@@ -8,30 +8,23 @@
 # authors:  gaoyuanhot@gmail.com
 # ------------------------------------------------------
 
-FROM ubuntu:18.04
+FROM node:10
 
-ARG VERSION=v1.7.8+hotfix.4
+WORKDIR /usr/src/app
 
-ENV FLUTTER_PATH=/flutter/bin
+RUN curl -o deploy.zip "https://github.com/cic1988/weorder/releases/download/v0.7.0/deploy.zip"
+RUN unzip deploy.zip
 
-WORKDIR /
+# Install app dependencies
+# A wildcard is used to ensure both package.json AND package-lock.json are copied
+# where available (npm@5+)
+# COPY package*.json ./
 
-# Install flutter
-RUN apt-get update &&\
- apt-get install -y lcov git-core curl unzip libglu1 lib32stdc++6 &&\
- git clone --branch ${VERSION} --depth=1 https://github.com/flutter/flutter.git &&\
- ${FLUTTER_PATH}/flutter doctor &&\
- apt-get remove -y curl unzip &&\
- apt autoremove -y &&\
- rm -rf /var/lib/apt/lists/*
+RUN npm install
+#COPY . .
 
-ENV PATH $PATH:${FLUTTER_PATH}/cache/dart-sdk/bin:${FLUTTER_PATH}
-
-# TODO: check flutter version > 1.5.4
-# Install webdev for flutter for web
-# see: https://github.com/flutter/flutter_web
-RUN flutter pub global activate webdev
-ENV PATH $PATH:$HOME/.pub-cache/bin
+EXPOSE 15000
+CMD [ "node", "server.js" ]
 
 
 
