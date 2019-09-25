@@ -8,22 +8,23 @@
 # authors:  gaoyuanhot@gmail.com
 # ------------------------------------------------------
 
-FROM node:10
+FROM node:10-alpine
 
-WORKDIR /usr/src/app
+RUN mkdir -p /home/node/app/node_modules
 
-RUN curl -o deploy.zip "https://github.com/cic1988/weorder/releases/download/v0.7.0/deploy.zip"
-RUN unzip deploy.zip
+WORKDIR /home/node/app
 
-# Install app dependencies
-# A wildcard is used to ensure both package.json AND package-lock.json are copied
-# where available (npm@5+)
-# COPY package*.json ./
+RUN apk --no-cache add curl && \
+    curl -s https://api.github.com/repos/cic1988/weorder-web-docker/releases/latest \
+    | grep "browser_download_url.*zip" \
+    | cut -d '"' -f 4 \
+    | xargs wget -O deploy.zip && \
+    unzip deploy.zip && \
+    cd deploy && \
+    chown -R node:node /home/node/app && \
+    npm install
 
-RUN npm install
-#COPY . .
-
-EXPOSE 15000
+EXPOSE 8080
 CMD [ "node", "server.js" ]
 
 
