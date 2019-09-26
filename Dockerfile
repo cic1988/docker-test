@@ -1,27 +1,29 @@
 # ------------------------------------------------------
 #                       Dockerfile
 # ------------------------------------------------------
-# image:    weorder-web
-# name:     cic1988/weorder-web
+# image:    weorder-web-docker
+# name:     cic1988/weorder-web-docker
 # repo:     https://github.com/cic1988/weorder-web-docker.git
-# Requires: ubuntu:latest
 # authors:  gaoyuanhot@gmail.com
 # ------------------------------------------------------
 
 FROM node:10-alpine
 
-RUN mkdir -p /home/node/app/node_modules
+RUN mkdir -p /home/node/app/node_modules && \
+    chown -R node:node /home/node/app && \
+    apk --no-cache add curl
 
 WORKDIR /home/node/app
 
-RUN apk --no-cache add curl && \
-    curl -s https://api.github.com/repos/cic1988/weorder-web-docker/releases/latest \
+USER node
+
+RUN curl -s https://api.github.com/repos/cic1988/weorder-web-docker/releases/latest \
     | grep "browser_download_url.*zip" \
     | cut -d '"' -f 4 \
     | xargs wget -O deploy.zip && \
     unzip deploy.zip && \
-    cd deploy && \
-    chown -R node:node /home/node/app && \
+    cp -r deploy/* . && \
+    rm -rf deploy* && \
     npm install
 
 EXPOSE 8080
