@@ -13,21 +13,13 @@ RUN mkdir -p /home/node/app/node_modules && \
     chown -R node:node /home/node/app && \
     apk --no-cache add curl
 
-WORKDIR /home/node/app
-
 USER node
 
-RUN curl -s https://api.github.com/repos/cic1988/weorder-web-docker/releases/latest \
-    | grep "browser_download_url.*zip" \
-    | cut -d '"' -f 4 \
-    | xargs wget -O deploy.zip && \
-    unzip deploy.zip && \
-    cp -r deploy/* . && \
-    rm -rf deploy* && \
+WORKDIR /home/node/app
+RUN wget https://release.happyanneducation.com/latest.zip && unzip *.zip && \
+    mv ./deploy/* . && rm -rf deploy && rm *.zip && \
     npm install
 
 EXPOSE 8080
+
 CMD [ "node", "server.js" ]
-
-
-
